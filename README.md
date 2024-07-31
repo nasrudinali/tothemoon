@@ -1,3 +1,6 @@
+# Project Folder Structure
+
+```
 tothemoon-claimer/
     bot-proxy.py
     bot.py
@@ -16,3 +19,4 @@ tothemoon-claimer/
             process_do_task.py
             start_game.py
             __init__.py
+```

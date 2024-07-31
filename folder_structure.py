@@ -3,6 +3,8 @@ import os
 
 def generate_folder_structure(root_dir, output_file):
     with open(output_file, "w") as file:
+        file.write("# Project Folder Structure\n\n")
+        file.write("```\n")  # Start code block
         for dirpath, dirnames, filenames in os.walk(root_dir):
             # Ignore the .git directory
             dirnames[:] = [d for d in dirnames if d != ".git"]
@@ -13,6 +15,7 @@ def generate_folder_structure(root_dir, output_file):
             sub_indent = " " * 4 * (level + 1)
             for f in filenames:
                 file.write("{}{}\n".format(sub_indent, f))
+        file.write("```\n")  # End code block
 
 
 if __name__ == "__main__":
