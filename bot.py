@@ -2,16 +2,17 @@ import sys
 
 sys.dont_write_bytecode = True
 
-from package import Base
-from package.game_modules import (
-    start_game,
-    game_info,
-    process_check_in,
-    process_do_task,
-)
-import time
+from package import base
+from package.core.token import get_token
+from package.core.info import asset
+from package.core.check_in import process_check_in
+from package.core.do_task import process_do_task
+from package.core.claim_invite import process_claim_invite
+from package.core.explore_planet import process_explore_planet
+from package.core.farm import process_farming
 
-base = Base()
+import time
+import brotli
 
 
 class ToTheMoon:
@@ -61,38 +62,78 @@ class ToTheMoon:
                 base.log(self.line)
                 base.log(f"{base.green}Account number: {base.white}{no+1}/{num_acc}")
 
-                # Get token
-                token = start_game.get_token(data=data)
+                try:
+                    # Get token
+                    token = get_token(data=data)
 
-                if token:
-                    # Get game info
-                    asset = game_info.asset(token=token)
-                    sd = asset["data"]["sd"]
-                    probe = asset["data"]["probe"]
-                    eth = asset["data"]["eth"]
-                    invite_sd = asset["data"]["frozenInviteSd"]
-                    farm_end_time = asset["data"]["farmingEndTime"]
-                    current_time = asset["data"]["systemTimestamp"]
-                    base.log(
-                        f"{base.green}SD: {base.white}{sd} - {base.green}Probe: {base.white}{probe} - {base.green}ETH: {base.white}{eth}"
-                    )
+                    if token:
+                        # Get game info
+                        sd, probe, eth, invite_sd, farm_end_time, current_time = asset(
+                            token=token
+                        )
+                        base.log(
+                            f"{base.green}SD: {base.white}{sd} - {base.green}Probe: {base.white}{probe} - {base.green}ETH: {base.white}{eth}"
+                        )
 
-                    # Check in
-                    if self.auto_check_in:
-                        base.log(f"{base.yellow}Auto Check-in: {base.green}ON")
-                        process_check_in.check_in(token=token)
+                        # Check in
+                        if self.auto_check_in:
+                            base.log(f"{base.yellow}Auto Check-in: {base.green}ON")
+                            process_check_in(token=token)
+                        else:
+                            base.log(f"{base.yellow}Auto Check-in: {base.red}OFF")
+
+                        # Do task
+                        if self.auto_do_task:
+                            base.log(f"{base.yellow}Auto Do Task: {base.green}ON")
+                            process_do_task(token=token)
+                        else:
+                            base.log(f"{base.yellow}Auto Do Task: {base.red}OFF")
+
+                        # Claim invite
+                        if self.auto_claim_invite:
+                            base.log(f"{base.yellow}Auto Claim Invite: {base.green}ON")
+                            if invite_sd > 0:
+                                process_claim_invite(token=token)
+                            else:
+                                base.log(
+                                    f"{base.white}Claim Invite: {base.red}No SD from friends"
+                                )
+                        else:
+                            base.log(f"{base.yellow}Auto Claim Invite: {base.red}OFF")
+
+                        # Explore planet
+                        if self.auto_explore_planet:
+                            base.log(
+                                f"{base.yellow}Auto Explore Planet: {base.green}ON"
+                            )
+                            if probe > 0:
+                                process_explore_planet(token=token)
+                            else:
+                                base.log(
+                                    f"{base.white}Explore Planet: {base.red}No Probe available"
+                                )
+                        else:
+                            base.log(f"{base.yellow}Auto Explore Planet: {base.red}OFF")
+
+                        # Farming
+                        if self.auto_farm:
+                            base.log(f"{base.yellow}Auto Farm: {base.green}ON")
+                            if farm_end_time == 0:
+                                time_left = process_farming(token=token)
+                                time_left_list.append(time_left)
+                            else:
+                                base.log(
+                                    f"{base.white}Auto Farm: {base.red}Not time to claim yet"
+                                )
+                                time_left = (farm_end_time - current_time) / 1000
+                                time_left_list.append(time_left)
+                        else:
+                            base.log(f"{base.yellow}Auto Farm: {base.red}OFF")
+
                     else:
-                        base.log(f"{base.yellow}Auto Check-in: {base.red}OFF")
-
-                    # Do task
-                    if self.auto_do_task:
-                        base.log(f"{base.yellow}Auto Do Task: {base.green}ON")
-                        process_do_task.do_task(token=token)
-                    else:
-                        base.log(f"{base.yellow}Auto Do Task: {base.red}OFF")
-
-                else:
-                    base.log(f"{base.red}Token not found! Please get new query id")
+                        base.log(f"{base.red}Token not found! Please get new query id")
+                except Exception as e:
+                    base.log(f"{base.red}Error: {base.white}{e}")
 
             print()
             if time_left_list:

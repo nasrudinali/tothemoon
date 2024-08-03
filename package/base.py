@@ -65,13 +65,13 @@ class Base:
         print(f"{self.black}[{now}]{self.reset} {msg}{self.reset}")
 
     # Handle proxy version
-    def proxies(self, proxy_info):
+    def format_proxy(self, proxy_info):
         return {"http": f"{proxy_info}", "https": f"{proxy_info}"}
 
     def check_ip(self, proxy_info):
         url = "https://api.ipify.org?format=json"
 
-        proxies = self.proxies(proxy_info=proxy_info)
+        proxies = self.format_proxy(proxy_info=proxy_info)
 
         # Parse the proxy credentials if present
         if "@" in proxy_info:
@@ -85,9 +85,11 @@ class Base:
         try:
             response = requests.get(url=url, proxies=proxies, auth=auth)
             response.raise_for_status()  # Raises an error for bad status codes
-            return response.json().get("ip")
+            actual_ip = response.json().get("ip")
+            self.log(f"{self.green}Actual IP Address: {self.white}{actual_ip}")
+            return actual_ip
         except requests.exceptions.RequestException as e:
-            print(f"IP check failed: {e}")
+            self.log(f"{self.red}IP check failed: {self.white}{e}")
             return None
 
     def parse_proxy_info(self, proxy_info):
@@ -96,6 +98,13 @@ class Base:
             credentials, endpoint = stripped_url.split("@", 1)
             user_name, password = credentials.split(":", 1)
             ip, port = endpoint.split(":", 1)
+            self.log(f"{self.green}Input IP Address: {self.white}{ip}")
             return {"user_name": user_name, "pass": password, "ip": ip, "port": port}
         except:
+            self.log(
+                f"{self.red}Check proxy format: {self.white}http://user:pass@ip:port"
+            )
             return None
+
+
+base = Base()

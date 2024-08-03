@@ -1,8 +1,19 @@
 import requests
-from package.game_modules.start_game import headers
-from package.base import Base
 
-base = Base()
+from package.core.headers import headers
+from package.base import base
+
+
+def visit_ss(token, proxies=None):
+    url = "https://moon.popp.club/moon/task/visit/ss"
+
+    try:
+        response = requests.post(
+            url=url, headers=headers(token), proxies=proxies, timeout=20
+        )
+        return response.json()
+    except:
+        return None
 
 
 def task_list(token, proxies=None):
@@ -41,7 +52,8 @@ def claim_task(token, task_id, proxies=None):
         return None
 
 
-def do_task(token, proxies=None):
+def process_do_task(token, proxies=None):
+    process_visit_ss = visit_ss(token=token, proxies=proxies)
     get_task_list = task_list(token=token, proxies=proxies)
     if get_task_list:
         tasks = get_task_list["data"]
@@ -62,9 +74,7 @@ def do_task(token, proxies=None):
                     if process_claim_task:
                         claim_task_status = process_claim_task["code"]
                         if claim_task_status == "400":
-                            base.log(
-                                f"{base.white}{task_name}: {base.red}Incomplete (please do by yourself)"
-                            )
+                            base.log(f"{base.white}{task_name}: {base.red}Incomplete")
                         elif claim_task_status == "00":
                             base.log(
                                 f"{base.white}{task_name}: {base.green}Claim success"

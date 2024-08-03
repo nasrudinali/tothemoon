@@ -2,17 +2,7 @@ import requests
 import json
 import urllib.parse
 
-
-def headers(token=None):
-    headers = {
-        "Accept": "application/json, text/plain, */*",
-        "Origin": "https://planet.popp.club",
-        "Referer": "https://planet.popp.club/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
-    }
-    if token:
-        headers["Authorization"] = token
-    return headers
+from package.core.headers import headers
 
 
 def parse_query_id(data):
