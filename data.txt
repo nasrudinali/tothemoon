@@ -1,1 +1,0 @@
-query_id=AAGkeI9gAgAAAKR4j2BkiEPu&user=%7B%22id%22%3A5914982564%2C%22first_name%22%3A%22Truong%20Giang%22%2C%22last_name%22%3A%22%22%2C%22username%22%3A%22trgiangpham%22%2C%22language_code%22%3A%22en%22%2C%22allows_write_to_pm%22%3Atrue%7D&auth_date=1722409132&hash=0f087ca3e6d1e3404a83643ea3b4068c6441feeb6e22b60c7a62ef0d6076914f
